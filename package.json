@@ -1,0 +1,37 @@
+{
+  "name": "nuclear-crypto",
+  "version": "1.0.0",
+  "description": "это TypeScript-библиотека, которая симулирует квантовое распределение ключей (QKD) с использованием протокола BB84 и предоставляет инструменты для шифрования и расшифрования данных на основе полученного квантового ключа.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jobdn/nuclear-crypto.git"
+  },
+  "keywords": [
+    "nuclear-crypto",
+    "crypto",
+    "nuclear",
+    "QKD",
+    "BB84",
+    "Bennett&Brassard",
+    "1984",
+    "B92",
+    "E91",
+    "Quantum",
+    "Key",
+    "Distribution"
+  ],
+  "author": "Dan Writerev",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jobdn/nuclear-crypto/issues"
+  },
+  "homepage": "https://github.com/jobdn/nuclear-crypto#readme",
+  "files": [
+    "dist"
+  ],
+  "type": "module"
+}
