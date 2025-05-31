@@ -13,13 +13,13 @@ npm install quantum-crypto-sim
 🚀 Пример использования
 
 ```ts
-import { generateQuantumKey, encrypt, decrypt } from "quantum-crypto-sim";
+import { generateQuantumKey, encrypt, decrypt } from 'quantum-crypto-sim';
 
 // Генерация квантового ключа (с возможной симуляцией атаки)
 const key = generateQuantumKey({ length: 128, simulateEve: true });
 
 // Шифруем сообщение
-const ciphertext = encrypt("Привет, мир!", key);
+const ciphertext = encrypt('Привет, мир!', key);
 
 // Расшифровываем сообщение
 const plaintext = decrypt(ciphertext, key);

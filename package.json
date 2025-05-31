@@ -4,7 +4,9 @@
   "description": "это TypeScript-библиотека, которая симулирует квантовое распределение ключей (QKD) с использованием протокола BB84 и предоставляет инструменты для шифрования и расшифрования данных на основе полученного квантового ключа.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "ci": "npm run build",
+    "format": "prettier --write ."
   },
   "repository": {
     "type": "git",
@@ -33,5 +35,9 @@
   "files": [
     "dist"
   ],
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  }
 }
