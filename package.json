@@ -2,11 +2,23 @@
   "name": "nuclear-crypto",
   "version": "1.0.0",
   "description": "это TypeScript-библиотека, которая симулирует квантовое распределение ключей (QKD) с использованием протокола BB84 и предоставляет инструменты для шифрования и расшифрования данных на основе полученного квантового ключа.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
-    "ci": "npm run build",
-    "format": "prettier --write ."
+    "build": "tsup",
+    "ci": "npm run build && npm run check-format && npm run check-exports && npm run lint",
+    "format": "prettier --write .",
+    "check-format": "prettier --check .",
+    "check-exports": "attw --pack . --ignore-rules=cjs-resolves-to-esm",
+    "lint": "tsc",
+    "test": "vitest run --reporter verbose --coverage",
+    "dev": "vitest --reporter verbose"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": "./dist/index.js",
+      "default": "./dist/index.cjs"
+    }
   },
   "repository": {
     "type": "git",
@@ -37,7 +49,11 @@
   ],
   "type": "module",
   "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.1",
+    "@vitest/coverage-v8": "^3.1.4",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.3"
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.4"
   }
 }
