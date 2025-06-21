@@ -3,7 +3,7 @@ import { simulateE91 } from './'; // обнови путь при необход
 
 describe('simulateE91', () => {
   it('возвращает результат с правильной структурой', () => {
-    const result = simulateE91(100);
+    const result = simulateE91({ length: 100 });
 
     expect(result).toHaveProperty('aliceBits');
     expect(result).toHaveProperty('bobBits');
@@ -19,14 +19,14 @@ describe('simulateE91', () => {
   });
 
   it('sharedKeyAlice и sharedKeyBob должны иметь одинаковую длину', () => {
-    const result = simulateE91(100);
+    const result = simulateE91({ length: 100 });
 
     expect(result.sharedKeyAlice.length).toBe(result.sharedKeyBob.length);
     expect(result.sharedKeyAlice.length).toBe(result.matchedIndices.length);
   });
 
   it('бит Алисы и Боба должны быть антикоррелированы (в симметричной части ключа)', () => {
-    const result = simulateE91(200);
+    const result = simulateE91({ length: 200 });
 
     result.sharedKeyAlice.forEach((bit: any, i: number) => {
       expect(bit).not.toBe(result.sharedKeyBob[i]);
@@ -34,7 +34,7 @@ describe('simulateE91', () => {
   });
 
   it('используются только допустимые базисы и биты', () => {
-    const result = simulateE91(100);
+    const result = simulateE91({ length: 100 });
 
     const validABases = ['A1', 'A2', 'A3'];
     const validBBases = ['B1', 'B2', 'B3'];
@@ -47,7 +47,7 @@ describe('simulateE91', () => {
   });
 
   it('ключ формируется только при совместимых базисах (A1+B1, A2+B2)', () => {
-    const result = simulateE91(200);
+    const result = simulateE91({ length: 200 });
 
     for (let i = 0; i < result.matchedIndices.length; i++) {
       const index = result.matchedIndices[i] as number;
@@ -58,5 +58,34 @@ describe('simulateE91', () => {
         (aBasis === 'A2' && bBasis === 'B2');
       expect(validPair).toBe(true);
     }
+  });
+
+  it('при simulateEve=true антикорреляция нарушается', () => {
+    const result = simulateE91({ length: 200, simulateEve: true });
+
+    // Подсчёт количества совпадающих битов (нарушение антикорреляции)
+    // @ts-ignore
+    const errors = result.sharedKeyAlice.reduce((acc, bit, i) => {
+      return bit === result.sharedKeyBob[i] ? acc + 1 : acc;
+    }, 0);
+
+    // В норме в E91 все биты должны быть противоположны => ошибок быть не должно
+    // При атаке Евы — ошибки увеличиваются
+    expect(errors).toBeGreaterThan(0);
+  });
+
+  it('антикорреляция хуже при simulateEve=true чем при simulateEve=false', () => {
+    const clean = simulateE91({ length: 300, simulateEve: false });
+    const attacked = simulateE91({ length: 300, simulateEve: true });
+    // @ts-ignore
+    const cleanErrors = clean.sharedKeyAlice.reduce((acc, bit, i) => {
+      return bit === clean.sharedKeyBob[i] ? acc + 1 : acc;
+    }, 0);
+    // @ts-ignore
+    const attackedErrors = attacked.sharedKeyAlice.reduce((acc, bit, i) => {
+      return bit === attacked.sharedKeyBob[i] ? acc + 1 : acc;
+    }, 0);
+
+    expect(attackedErrors).toBeGreaterThan(cleanErrors);
   });
 });

@@ -64,4 +64,29 @@ describe('simulateB92', () => {
 
     expect(errorRate).toBeLessThan(0.3); // т.к. без Евы, ошибки только от детектирования
   });
+
+  it('при наличии Евы возрастает количество ошибок', () => {
+    const noEve = simulateB92(200, false);
+    const withEve = simulateB92(200, true);
+
+    const errorsNoEve = noEve.sharedKeyAlice.filter(
+      (bit, i) => bit !== noEve.sharedKeyBob[i],
+    ).length;
+
+    const errorsWithEve = withEve.sharedKeyAlice.filter(
+      (bit, i) => bit !== withEve.sharedKeyBob[i],
+    ).length;
+
+    const errorRateNoEve =
+      noEve.sharedKeyAlice.length > 0
+        ? errorsNoEve / noEve.sharedKeyAlice.length
+        : 0;
+
+    const errorRateWithEve =
+      withEve.sharedKeyAlice.length > 0
+        ? errorsWithEve / withEve.sharedKeyAlice.length
+        : 0;
+
+    expect(errorRateWithEve).toBeGreaterThanOrEqual(errorRateNoEve);
+  });
 });

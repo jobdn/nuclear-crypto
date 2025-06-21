@@ -2,7 +2,7 @@ type Bit = 0 | 1;
 type Basis = 'Z' | 'X';
 type State = 'Z0' | 'Z1' | 'X0' | 'X1';
 
-interface LM05Result {
+export interface LM05Result {
   bobInitialStates: State[];
   bobBases: Basis[];
   aliceOperations: Bit[];
@@ -10,6 +10,7 @@ interface LM05Result {
   sharedKeyAlice: Bit[];
   sharedKeyBob: Bit[];
   errorCount: number;
+  eveInterceptions?: number;
 }
 
 function getRandomBit(): Bit {
@@ -41,7 +42,25 @@ function flipState(state: State): State {
   }
 }
 
-export function simulateLM05(length: number): LM05Result {
+function measureStateRandomly(state: State, basis: Basis): State {
+  const [s0, s1] = {
+    Z: ['Z0', 'Z1'],
+    X: ['X0', 'X1'],
+  }[basis];
+
+  // Если в том же базисе — измерение правильное
+  if (state === s0 || state === s1) return state;
+  // Иначе — результат случайный
+  return Math.random() < 0.5 ? (s0 as State) : (s1 as State);
+}
+
+export function simulateLM05({
+  length,
+  simulateEve = false,
+}: {
+  length: number;
+  simulateEve?: boolean;
+}): LM05Result {
   const bobInitialStates: State[] = [];
   const bobBases: Basis[] = [];
   const aliceOperations: Bit[] = [];
@@ -49,22 +68,40 @@ export function simulateLM05(length: number): LM05Result {
   const sharedKeyAlice: Bit[] = [];
   const sharedKeyBob: Bit[] = [];
   let errorCount = 0;
+  let eveInterceptions = 0;
 
   for (let i = 0; i < length; i++) {
     const basis = getRandomBasis();
     const initialState = getInitialState(basis);
-    const operation = getRandomBit(); // 0 — ничего, 1 — флип
-
-    bobInitialStates.push(initialState);
     bobBases.push(basis);
+    bobInitialStates.push(initialState);
+
+    let transmittedState = initialState;
+
+    // Ева вмешивается
+    if (simulateEve) {
+      eveInterceptions++;
+      const eveBasis1 = getRandomBasis();
+      transmittedState = measureStateRandomly(transmittedState, eveBasis1); // искажение на пути к Алисе
+    }
+
+    const operation = getRandomBit(); // 0 — ничего, 1 — флип
     aliceOperations.push(operation);
 
-    const returnedState =
-      operation === 0 ? initialState : flipState(initialState);
-    bobMeasuredStates.push(returnedState);
+    const operatedState =
+      operation === 1 ? flipState(transmittedState) : transmittedState;
 
+    // Ева снова вмешивается
+    let finalState = operatedState;
+    if (simulateEve) {
+      const eveBasis2 = getRandomBasis();
+      finalState = measureStateRandomly(finalState, eveBasis2); // искажение на пути к Бобу
+    }
+
+    bobMeasuredStates.push(finalState);
+
+    const decodedBit = finalState === initialState ? 0 : 1;
     sharedKeyAlice.push(operation);
-    const decodedBit = returnedState === initialState ? 0 : 1;
     sharedKeyBob.push(decodedBit);
 
     if (decodedBit !== operation) errorCount++;
@@ -78,5 +115,6 @@ export function simulateLM05(length: number): LM05Result {
     sharedKeyAlice,
     sharedKeyBob,
     errorCount,
+    eveInterceptions: simulateEve ? eveInterceptions : undefined,
   };
 }
